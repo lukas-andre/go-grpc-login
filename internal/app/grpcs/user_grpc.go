@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/wire"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/metadata"
 	"google.golang.org/grpc/status"
@@ -21,30 +22,20 @@ var (
 
 type UserServiceServer struct {
 	pkg.UnimplementedUserServiceServer
-	opts userServerOpts
+	opts *UserServerOpts
 }
 
-type UserServiceServerOpts func(*userServerOpts)
-
-type userServerOpts struct {
-	userService services.UserService
+type UserServerOpts struct {
+	UserService *services.UserService
 }
 
-func NewUserServiceServer(deps ...UserServiceServerOpts) *UserServiceServer {
-	d := &userServerOpts{}
-	for _, dep := range deps {
-		dep(d)
-	}
+func NewUserServiceServer(opts *UserServerOpts) *UserServiceServer {
 	return &UserServiceServer{
-		opts: *d,
+		opts: opts,
 	}
 }
 
-func WithUserServerUserService(userService services.UserService) UserServiceServerOpts {
-	return func(d *userServerOpts) {
-		d.userService = userService
-	}
-}
+var UserServiceServerSet = wire.NewSet(wire.Struct(new(UserServerOpts), "*"), NewUserServiceServer)
 
 func (s *UserServiceServer) GetUserInfo(ctx context.Context, in *pkg.GetUserInfoRequest) (*pkg.GetUserInfoResponse, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -75,7 +66,7 @@ func (s *UserServiceServer) GetUserInfo(ctx context.Context, in *pkg.GetUserInfo
 		fmt.Println(err)
 	}
 
-	user, _ := s.opts.userService.GetUserByUsername(in.Username)
+	user, _ := s.opts.UserService.GetUserByUsername(in.Username)
 
 	if user.ID == 0 {
 		return nil, status.Error(codes.NotFound, "User not found")
@@ -96,7 +87,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, in *pkg.CreateUserRe
 		UpdatedAt: time.Now(),
 	}
 
-	result, err := s.opts.userService.CreateUser(user)
+	result, err := s.opts.UserService.CreateUser(user)
 
 	fmt.Println(result)
 

@@ -5,15 +5,22 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt"
+	"github.com/google/wire"
 )
 
 type TokenHandler struct {
-	signingKey string
+	opts TokenHandlerOpts
 }
 
-func NewTokenHandler(signingKey string) *TokenHandler {
-	return &TokenHandler{signingKey: signingKey}
+type TokenHandlerOpts struct {
+	SigningKey string
 }
+
+func NewTokenHandler(opts TokenHandlerOpts) *TokenHandler {
+	return &TokenHandler{opts: opts}
+}
+
+var TokenHandlerSet = wire.NewSet(wire.Struct(new(TokenHandlerOpts), "*"), NewTokenHandler)
 
 type UserInfo struct {
 	Username string
@@ -36,5 +43,5 @@ func (t *TokenHandler) CreateToken(user models.User) (string, error) {
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
 
-	return token.SignedString(t.signingKey)
+	return token.SignedString(t.opts.SigningKey)
 }

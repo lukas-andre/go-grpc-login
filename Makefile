@@ -6,3 +6,6 @@ run:
 
 clean:
 	rm -rf pkg
+
+wire:
+	cd cmd/di_container; rm -rf wire_gen.go; wire

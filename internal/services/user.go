@@ -3,42 +3,32 @@ package services
 import (
 	"login_grpc/internal/models"
 	"login_grpc/internal/repository"
+
+	"github.com/google/wire"
 )
 
 type UserService struct {
-	opts userServiceOpts
+	opts *UserServiceOpts
 }
 
-type UserServiceOpts func(*userServiceOpts)
-
-type userServiceOpts struct {
-	repo repository.UserRepository
+type UserServiceOpts struct {
+	UserRepo *repository.UserRepository
 }
 
-func NewUserService(opts ...UserServiceOpts) UserService {
-	o := &userServiceOpts{}
-	for _, opt := range opts {
-		opt(o)
-	}
-	return UserService{
-		opts: *o,
-	}
+func NewUserService(opts *UserServiceOpts) *UserService {
+	return &UserService{opts: opts}
 }
 
-func WithUserRepository(repo repository.UserRepository) UserServiceOpts {
-	return func(opt *userServiceOpts) {
-		opt.repo = repo
-	}
-}
+var UserServiceSet = wire.NewSet(wire.Struct(new(UserServiceOpts), "*"), NewAuthService)
 
-func (s *UserService) GetUserByUsername(username string) (models.User, error) {
-	user, err := s.opts.repo.GetUserByUsernmae(username)
+func (s *UserService) GetUserByUsername(username string) (*models.User, error) {
+	user, err := s.opts.UserRepo.GetByUsername(username)
 
 	return user, err
 }
 
-func (s *UserService) CreateUser(user models.User) (models.User, error) {
-	result, err := s.opts.repo.CreateUser(user)
+func (s *UserService) CreateUser(user models.User) (*models.User, error) {
+	result, err := s.opts.UserRepo.CreateUser(user)
 
 	return result, err
 }

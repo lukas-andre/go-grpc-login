@@ -1,57 +1,49 @@
 package grpcs
 
-// import (
-// 	"context"
-// 	auth "login_grpc/pkg/auth"
-// 	usersModels "login_grpc/pkg/models"
-// 	"login_grpc/pkg/protogen/loginpb"
+import (
+	"context"
+	"login_grpc/internal/services"
+	"login_grpc/pkg"
 
-// 	"gorm.io/gorm"
-// )
+	"github.com/google/wire"
+)
 
-// type LoginServiceServer struct {
-// 	loginpb.UnimplementedLoginServiceServer
-// 	dependencies
-// }
+type AuthServiceServer struct {
+	pkg.UnimplementedLoginServiceServer
+	opts AuthServerOptions
+}
 
-// type Dependencies func(*dependencies)
+type AuthServerOptions struct {
+	AuthService  *services.AuthService
+	UserService  *services.UserService
+	TokenHandler *services.TokenHandler
+}
 
-// type dependencies struct {
-// 	dbClient *gorm.DB
-// }
+func NewAuthServiceServer(opts AuthServerOptions) *AuthServiceServer {
+	return &AuthServiceServer{
+		opts: opts,
+	}
+}
 
-// func New(deps ...Dependencies) *LoginServiceServer {
-// 	d := &dependencies{}
-// 	for _, dep := range deps {
-// 		dep(d)
-// 	}
-// 	return &LoginServiceServer{
-// 		dependencies: *d,
-// 	}
-// }
+var AuthServiceServerSet = wire.NewSet(wire.Struct(new(AuthServerOptions), "*"), NewAuthServiceServer)
 
-// func WithDbClient(dbClient *gorm.DB) Dependencies {
-// 	return func(d *dependencies) {
-// 		d.dbClient = dbClient
-// 	}
-// }
+func (s *AuthServiceServer) Login(ctx context.Context, in *pkg.LoginRequest) (*pkg.LoginResponse, error) {
+	return nil, nil
+	// user := models.User{}
 
-// func (s *LoginServiceServer) Login(ctx context.Context, in *loginpb.LoginRequest) (*loginpb.LoginResponse, error) {
-// 	user := usersModels.User{}
+	// tx := s.dbClient.Find(&user, "username = ?", in.Username)
 
-// 	tx := s.dbClient.Find(&user, "username = ?", in.Username)
+	// if tx.Error != nil {
+	// 	return nil, nil
+	// }
 
-// 	if tx.Error != nil {
-// 		return nil, nil
-// 	}
+	// token, err := auth.CreateToken(user)
 
-// 	token, err := auth.CreateToken(user)
+	// if err != nil {
+	// 	return nil, err
+	// }
 
-// 	if err != nil {
-// 		return nil, err
-// 	}
-
-// 	return &loginpb.LoginResponse{
-// 		Token: token,
-// 	}, nil
-// }
+	// return &pkg.LoginResponse{
+	// 	Token: token,
+	// }, nil
+}

@@ -3,53 +3,42 @@ package repository
 import (
 	"login_grpc/internal/models"
 
+	"github.com/google/wire"
 	"gorm.io/gorm"
 )
 
 type UserRepository struct {
-	opts userOpts
+	opts *UserRepositoryOpts
 }
 
-type UserRepositoryOpts func(*userOpts)
-
-type userOpts struct {
+type UserRepositoryOpts struct {
 	Dao *gorm.DB
 }
 
-func NewUserRepository(opts ...UserRepositoryOpts) UserRepository {
-	o := &userOpts{}
-	for _, opt := range opts {
-		opt(o)
-	}
-	return UserRepository{
-		opts: *o,
-	}
+func NewUserRepository(opts *UserRepositoryOpts) *UserRepository {
+	return &UserRepository{opts: opts}
 }
 
-func WithUserRepositoryDao(dao *gorm.DB) UserRepositoryOpts {
-	return func(opt *userOpts) {
-		opt.Dao = dao
-	}
-}
+var UserRepositorySet = wire.NewSet(wire.Struct(new(UserRepositoryOpts), "*"), NewUserRepository)
 
-func (repo *UserRepository) GetUserByUsernmae(username string) (models.User, error) {
+func (repo *UserRepository) GetByUsername(username string) (*models.User, error) {
 	user := models.User{}
 
 	tx := repo.opts.Dao.Find(&user, "username = ?", username)
 
 	if tx.Error != nil {
-		return user, tx.Error
+		return &user, tx.Error
 	}
 
-	return user, nil
+	return &user, nil
 }
 
-func (repo *UserRepository) CreateUser(user models.User) (models.User, error) {
+func (repo *UserRepository) CreateUser(user models.User) (*models.User, error) {
 	tx := repo.opts.Dao.Create(&user)
 
 	if tx.Error != nil {
-		return user, tx.Error
+		return &user, tx.Error
 	}
 
-	return user, nil
+	return &user, nil
 }

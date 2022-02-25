@@ -1,31 +1,20 @@
 package repository
 
 import (
+	"github.com/google/wire"
 	"gorm.io/gorm"
 )
 
 type AuthRepository struct {
-	opts authOpts
+	opts AuthRepositoryOpts
 }
 
-type AuthRepositoryOpts func(*authOpts)
-
-type authOpts struct {
+type AuthRepositoryOpts struct {
 	Dao *gorm.DB
 }
 
-func NewAuthRepository(deps ...AuthRepositoryOpts) *AuthRepository {
-	d := &authOpts{}
-	for _, dep := range deps {
-		dep(d)
-	}
-	return &AuthRepository{
-		opts: *d,
-	}
+func NewAuthRepository(opts AuthRepositoryOpts) *AuthRepository {
+	return &AuthRepository{opts: opts}
 }
 
-func WithAuthRepositoryDao(dao *gorm.DB) AuthRepositoryOpts {
-	return func(opt *authOpts) {
-		opt.Dao = dao
-	}
-}
+var AuthRepositorySet = wire.NewSet(wire.Struct(new(AuthRepositoryOpts), "*"), NewAuthRepository)
