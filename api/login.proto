@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package login;
 
-option go_package = "./loginpb";
+option go_package = "/pkg";
 
 message LoginRequest {
     string username = 1;
