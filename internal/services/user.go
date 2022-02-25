@@ -19,7 +19,7 @@ func NewUserService(opts *UserServiceOpts) *UserService {
 	return &UserService{opts: opts}
 }
 
-var UserServiceSet = wire.NewSet(wire.Struct(new(UserServiceOpts), "*"), NewAuthService)
+var UserServiceSet = wire.NewSet(wire.Struct(new(UserServiceOpts), "*"), NewUserService)
 
 func (s *UserService) GetUserByUsername(username string) (*models.User, error) {
 	user, err := s.opts.UserRepo.GetByUsername(username)

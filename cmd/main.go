@@ -5,9 +5,9 @@ import (
 	"net"
 	"os"
 
-	"login_grpc/cmd/config"
-	container "login_grpc/cmd/di_container"
+	"login_grpc/internal/config"
 	"login_grpc/internal/dao"
+	di "login_grpc/internal/di_container"
 	"login_grpc/pkg"
 
 	"google.golang.org/grpc"
@@ -55,16 +55,16 @@ func main() {
 	grpclog.SetLoggerV2(grpcLog)
 
 	// Dependency Injection Container
-	userRepository := container.InitializeUserRepository(d)
-	authRepository := container.InitializeAuthRepository(d)
+	userRepository := di.InitializeUserRepository(d)
+	authRepository := di.InitializeAuthRepository(d)
 
-	userService := container.InitializeUserService(userRepository)
-	authService := container.InitializeAuthService(authRepository)
+	userService := di.InitializeUserService(userRepository)
+	authService := di.InitializeAuthService(authRepository)
 
-	tokenHandler := container.InitializeTokenHandler(c.GetString("jwt.secret"))
+	tokenHandler := di.InitializeTokenHandler(c.GetString("jwt.secret"))
 
-	userServerService := container.InitializeUserServiceServer(userService)
-	authServiceServer := container.InitializeAuthServiceServer(authService, userService, tokenHandler)
+	userServerService := di.InitializeUserServiceServer(userService)
+	authServiceServer := di.InitializeAuthServiceServer(authService, userService, tokenHandler)
 
 	s := grpc.NewServer()
 	pkg.RegisterUserServiceServer(s, userServerService)
