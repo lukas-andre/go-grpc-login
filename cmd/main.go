@@ -21,7 +21,7 @@ func main() {
 	}
 
 	var (
-		routesServices = services.NewGrpcRoutesService()
+		routesServices = services.NewGrpMethodsService()
 
 		userRepository = di.InitializeUserRepository(db)
 		authRepository = di.InitializeAuthRepository(db)
@@ -45,8 +45,8 @@ func main() {
 
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
-		srv := grpc.NewServer(config.GetServerConfig(), userServiceServer, authServiceServer)
 		sc := config.GetServerConfig()
+		srv := grpc.NewServer(sc, userServiceServer, authServiceServer)
 		log.Printf("gRPC server running at %s://%s:%s ...\n", sc.GrpcProtocol, sc.Host, sc.GrpcPort)
 		return srv.Serve()
 	})

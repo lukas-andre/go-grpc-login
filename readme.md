@@ -1,5 +1,8 @@
 # GRPC + Go + Postgres <3
 
+
+> this project it is verbose on purpose 
+
 First create a go module with this command 
 ```sh
 go mod init
@@ -56,6 +59,28 @@ create grpc_login database in postgres
 ```sql
 CREATE DATABASE grpc_login;
 ```
+
+## TODO 
+- [ ] add a explication of the PoC arquitecture of the finish project
+- [ ] follow this flow: 
+    - [ ] protofiles with buf and Makefile
+    - [ ] start grpc server
+    - [ ] configuration
+    - [ ] connect to postgres with database config
+    - [ ] create user model and migrate to database
+    - [ ] create basic project structure grpc_service -> domain_service -> repository -> DAO
+    - [ ] use wire to manage dependencies
+    - [ ] implement and explain create user explanation
+    - [ ] use evans CLI to test the Grpc sever
+    - [ ] implement and explain login & token handler
+    - [ ] implementent logging interceptor
+    - [ ] implementent authorization interceptor 
+    - [ ] implementent globalService scope in go
+    - [ ] use globalService to validate token
+    - [ ] how to register public and private grpc methods
+    - [ ]  implementent methodService to validate token
+- [ ] add HTTP server and swagger generation with protofile annotations and grpc-gateway
+
 
 
 

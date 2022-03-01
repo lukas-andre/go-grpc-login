@@ -17,13 +17,13 @@ import (
 )
 
 type grpcServer struct {
-	config      *config.ServerConfig
-	userServer  pkg.UserServiceServer
-	loginServer pkg.LoginServiceServer
+	config             *config.ServerConfig
+	userServiceServer  pkg.UserServiceServer
+	loginServiceServer pkg.LoginServiceServer
 }
 
 func NewServer(c *config.ServerConfig, us pkg.UserServiceServer, ls pkg.LoginServiceServer) server.Server {
-	return &grpcServer{config: c, userServer: us, loginServer: ls}
+	return &grpcServer{config: c, userServiceServer: us, loginServiceServer: ls}
 }
 
 func (s *grpcServer) Serve() error {
@@ -39,8 +39,8 @@ func (s *grpcServer) Serve() error {
 
 	srv := grpc.NewServer(withUnaryInterceptor())
 
-	pkg.RegisterUserServiceServer(srv, s.userServer)
-	pkg.RegisterLoginServiceServer(srv, s.loginServer)
+	pkg.RegisterUserServiceServer(srv, s.userServiceServer)
+	pkg.RegisterLoginServiceServer(srv, s.loginServiceServer)
 
 	reflection.Register(srv)
 

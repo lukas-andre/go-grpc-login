@@ -8,9 +8,9 @@ import (
 )
 
 func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	routesServices := services.GetGlobalService(services.GrpcRoutesServiceKey).(*services.GrpcRoutesService)
+	methodService := services.GetGlobalService(services.GrpcRoutesServiceKey).(*services.GrpcMethodService)
 
-	if routesServices.IsPublicRoute(info.FullMethod) {
+	if methodService.IsPublicMethod(info.FullMethod) {
 		return handler(ctx, req)
 	}
 
