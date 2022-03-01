@@ -36,6 +36,10 @@ func (s *AuthServiceServer) Login(ctx context.Context, in *pkg.LoginRequest) (*p
 		return nil, status.Error(codes.NotFound, "User not found")
 	}
 
+	if _, err := s.opts.AuthService.CheckPasswordHash(in.Password, user.Password); err != nil {
+		return nil, status.Error(codes.Unauthenticated, "Invalid password")
+	}
+
 	token, err := s.opts.TokenHandler.CreateToken(user)
 	if err != nil {
 		grpclog.Errorf("Error creating token: %v", err)

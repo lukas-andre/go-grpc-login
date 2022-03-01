@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"fmt"
 	"login_grpc/internal/models"
 
 	"github.com/google/wire"
@@ -27,7 +28,8 @@ func (repo *UserRepository) GetByUsername(username string) (*models.User, error)
 	tx := repo.opts.Dao.Find(&user, "username = ?", username)
 
 	if tx.Error != nil {
-		return &user, tx.Error
+		fmt.Printf("Failed to get user: %s", tx.Error)
+		return nil, tx.Error
 	}
 
 	return &user, nil
@@ -37,6 +39,7 @@ func (repo *UserRepository) CreateUser(user models.User) (*models.User, error) {
 	tx := repo.opts.Dao.Create(&user)
 
 	if tx.Error != nil {
+		fmt.Printf("Failed to create user: %s", tx.Error)
 		return &user, tx.Error
 	}
 

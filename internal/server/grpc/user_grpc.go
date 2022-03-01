@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"fmt"
 	"login_grpc/internal/models"
 	"login_grpc/internal/services"
 	"login_grpc/pkg"
@@ -11,10 +10,6 @@ import (
 	"github.com/google/wire"
 	"google.golang.org/grpc/codes"
 	"google.golang.org/grpc/status"
-)
-
-var (
-	AuthorizationHeader = "Authorization"
 )
 
 type UserServiceServer struct {
@@ -36,11 +31,6 @@ func NewUserServiceServer(opts *UserServerOpts) *UserServiceServer {
 var UserServiceServerSet = wire.NewSet(wire.Struct(new(UserServerOpts), "*"), NewUserServiceServer)
 
 func (s *UserServiceServer) GetUserInfo(ctx context.Context, in *pkg.GetUserInfoRequest) (*pkg.GetUserInfoResponse, error) {
-	// if _, err := s.opts.AuthService.ValidateToken(ctx); err != nil {
-	// 	log.Printf("Error validating token: %v", err)
-	// 	return nil, status.Error(codes.PermissionDenied, "Invalid token")
-	// }
-
 	user, _ := s.opts.UserService.GetUserByUsername(in.Username)
 	if user.ID == 0 {
 		return nil, status.Error(codes.NotFound, "User not found")
@@ -54,22 +44,22 @@ func (s *UserServiceServer) GetUserInfo(ctx context.Context, in *pkg.GetUserInfo
 }
 
 func (s *UserServiceServer) CreateUser(ctx context.Context, in *pkg.CreateUserRequest) (*pkg.CreateUserResponse, error) {
+	passwordHash, err := s.opts.AuthService.HashPassword(in.Password)
+	if err != nil {
+		return nil, status.Error(codes.Internal, "Failed to hash password")
+	}
+
 	user := models.User{
 		Username:  in.Username,
-		Password:  in.Password,
+		Password:  passwordHash,
 		CreatedAt: time.Now(),
 		UpdatedAt: time.Now(),
 	}
 
-	result, err := s.opts.UserService.CreateUser(user)
-
-	fmt.Println(result)
-
-	// TODO: Handle error
-	if err != nil {
+	if _, err = s.opts.UserService.CreateUser(user); err != nil {
 		return &pkg.CreateUserResponse{
 			Success: false,
-		}, err
+		}, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pkg.CreateUserResponse{

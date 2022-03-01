@@ -6,6 +6,7 @@ import (
 	"login_grpc/internal/repository"
 
 	"github.com/google/wire"
+	"golang.org/x/crypto/bcrypt"
 	"google.golang.org/grpc/metadata"
 )
 
@@ -23,10 +24,9 @@ func NewAuthService(opts *AuthServiceOpts) *AuthService {
 }
 
 var (
+	AuthServiceSet      = wire.NewSet(wire.Struct(new(AuthServiceOpts), "*"), NewAuthService)
 	AuthorizationHeader = "Authorization"
 )
-
-var AuthServiceSet = wire.NewSet(wire.Struct(new(AuthServiceOpts), "*"), NewAuthService)
 
 func (s *AuthService) ValidateToken(ctx context.Context) (*UserClaims, error) {
 	md, ok := metadata.FromIncomingContext(ctx)
@@ -35,13 +35,20 @@ func (s *AuthService) ValidateToken(ctx context.Context) (*UserClaims, error) {
 	}
 
 	token := md.Get(AuthorizationHeader)
-	userClaims, err := s.opts.TokenHandler.ParseToken(token[0])
-
+	userClaims, err := s.opts.TokenHandler.ParseToken(token[len(token)-1])
 	if err != nil {
 		return nil, err
 	}
 
-	// s.opts.AuthRepo.UpdateLastLogin(userClaims.UserID)
-
 	return userClaims, nil
+}
+
+func (s *AuthService) HashPassword(password string) (string, error) {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+	return string(bytes), err
+}
+
+func (s *AuthService) CheckPasswordHash(password, hash string) (bool, error) {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(password))
+	return err == nil, err
 }

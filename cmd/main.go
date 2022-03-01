@@ -3,12 +3,11 @@ package main
 import (
 	"context"
 	"log"
-
-	"login_grpc/internal/common"
 	"login_grpc/internal/config"
 	"login_grpc/internal/dao"
 	di "login_grpc/internal/di_container"
 	"login_grpc/internal/server/grpc"
+	"login_grpc/internal/services"
 
 	"golang.org/x/sync/errgroup"
 )
@@ -22,6 +21,8 @@ func main() {
 	}
 
 	var (
+		routesServices = services.NewGrpcRoutesService()
+
 		userRepository = di.InitializeUserRepository(db)
 		authRepository = di.InitializeAuthRepository(db)
 
@@ -35,7 +36,9 @@ func main() {
 	)
 
 	ctx := context.Background()
-	ctx = common.SetGlobalService(ctx, common.GlobalService("tokenHandler"), tokenHandler)
+
+	ctx = services.RegisterGlobalService(ctx, authService)
+	ctx = services.RegisterGlobalService(ctx, routesServices)
 
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
@@ -43,8 +46,8 @@ func main() {
 	g, _ := errgroup.WithContext(ctx)
 	g.Go(func() error {
 		srv := grpc.NewServer(config.GetServerConfig(), userServiceServer, authServiceServer)
-
-		log.Printf("gRPC server running at %s://%s:%s ...\n", "tcp", "0.0.0.0", "50051")
+		sc := config.GetServerConfig()
+		log.Printf("gRPC server running at %s://%s:%s ...\n", sc.GrpcProtocol, sc.Host, sc.GrpcPort)
 		return srv.Serve()
 	})
 	log.Fatal(g.Wait())
