@@ -47,7 +47,6 @@ func (s *grpcServer) Serve() error {
 	if err := srv.Serve(listener); err != nil {
 		return err
 	}
-
 	return nil
 }
 

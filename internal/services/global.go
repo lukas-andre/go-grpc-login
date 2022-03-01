@@ -12,13 +12,13 @@ var (
 	globanContext context.Context
 	// if you want to add more global services, please create key here
 	// ExampleServiceKey = GlobalServiceKey("exampleService")
-	AuthServiceKey       = GlobalServiceKey("authService")
-	GrpcRoutesServiceKey = GlobalServiceKey("grpcRoutesService")
+	AuthServiceKey        = GlobalServiceKey("authService")
+	GrpcMethodsServiceKey = GlobalServiceKey("grpcMethodsService")
 
 	// and then add the service in the following map to register it
 	globalServicesMap = map[reflect.Type]GlobalServiceKey{
 		reflect.TypeOf(&AuthService{}):       AuthServiceKey,
-		reflect.TypeOf(&GrpcMethodService{}): GrpcRoutesServiceKey,
+		reflect.TypeOf(&GrpcMethodService{}): GrpcMethodsServiceKey,
 	}
 )
 

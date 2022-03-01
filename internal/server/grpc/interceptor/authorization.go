@@ -8,19 +8,16 @@ import (
 )
 
 func AuthorizationServerInterceptor(ctx context.Context, req interface{}, info *grpc.UnaryServerInfo, handler grpc.UnaryHandler) (interface{}, error) {
-	methodService := services.GetGlobalService(services.GrpcRoutesServiceKey).(*services.GrpcMethodService)
-
+	methodService := services.GetGlobalService(services.GrpcMethodsServiceKey).(*services.GrpcMethodService)
 	if methodService.IsPublicMethod(info.FullMethod) {
 		return handler(ctx, req)
 	}
 
 	authService := services.GetGlobalService(services.AuthServiceKey).(*services.AuthService)
 	_, err := authService.ValidateToken(ctx)
-
 	if err != nil {
 		return nil, err
 	}
 
-	h, _ := handler(ctx, req)
-	return h, err
+	return handler(ctx, req)
 }
