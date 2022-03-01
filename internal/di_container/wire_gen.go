@@ -8,8 +8,9 @@ package di
 
 import (
 	"gorm.io/gorm"
-	"login_grpc/internal/app/grpcs"
+	"login_grpc/internal/config"
 	"login_grpc/internal/repository"
+	"login_grpc/internal/server/grpc"
 	"login_grpc/internal/services"
 )
 
@@ -32,11 +33,12 @@ func InitializeUserService(ur *repository.UserRepository) *services.UserService 
 	return userService
 }
 
-func InitializeUserServiceServer(us *services.UserService) *grpcs.UserServiceServer {
-	userServerOpts := &grpcs.UserServerOpts{
+func InitializeUserServiceServer(us *services.UserService, as *services.AuthService) *grpc.UserServiceServer {
+	userServerOpts := &grpc.UserServerOpts{
 		UserService: us,
+		AuthService: as,
 	}
-	userServiceServer := grpcs.NewUserServiceServer(userServerOpts)
+	userServiceServer := grpc.NewUserServiceServer(userServerOpts)
 	return userServiceServer
 }
 
@@ -49,28 +51,29 @@ func InitializeAuthRepository(dao *gorm.DB) *repository.AuthRepository {
 	return authRepository
 }
 
-func InitializeAuthService(ar *repository.AuthRepository) *services.AuthService {
+func InitializeAuthService(ar *repository.AuthRepository, th *services.TokenHandler) *services.AuthService {
 	authServiceOpts := &services.AuthServiceOpts{
-		AuthRepo: ar,
+		TokenHandler: th,
+		AuthRepo:     ar,
 	}
 	authService := services.NewAuthService(authServiceOpts)
 	return authService
 }
 
-func InitializeAuthServiceServer(as *services.AuthService, us *services.UserService, th *services.TokenHandler) *grpcs.AuthServiceServer {
-	authServerOptions := grpcs.AuthServerOptions{
+func InitializeAuthServiceServer(as *services.AuthService, us *services.UserService, th *services.TokenHandler) *grpc.AuthServiceServer {
+	authServerOptions := grpc.AuthServerOptions{
 		AuthService:  as,
 		UserService:  us,
 		TokenHandler: th,
 	}
-	authServiceServer := grpcs.NewAuthServiceServer(authServerOptions)
+	authServiceServer := grpc.NewAuthServiceServer(authServerOptions)
 	return authServiceServer
 }
 
 // Token Dependencies Injection
-func InitializeTokenHandler(secret string) *services.TokenHandler {
+func InitializeTokenHandler(secret *config.JwtConfig) *services.TokenHandler {
 	tokenHandlerOpts := services.TokenHandlerOpts{
-		SigningKey: secret,
+		JwtConfig: secret,
 	}
 	tokenHandler := services.NewTokenHandler(tokenHandlerOpts)
 	return tokenHandler

@@ -1,17 +1,34 @@
 package config
 
-import (
-	"fmt"
+type DatabaseConfig struct {
+	Host       string
+	Port       int
+	User       string
+	Password   string
+	Name       string
+	Connection string
+}
 
-	"github.com/spf13/viper"
-)
+type ServerConfig struct {
+	Host         string
+	Port         string
+	GrpcProtocol string
+	GrpcPort     string
+	HttpPort     string
+}
 
-func Init() *viper.Viper {
-	viper.AddConfigPath("../../")
-	viper.SetConfigName("config")
-	err := viper.ReadInConfig()
-	if err != nil {
-		panic(fmt.Errorf("fatal error config file: %w", err))
-	}
-	return viper.GetViper()
+type JwtConfig struct {
+	Secret string
+}
+type config struct {
+	databaseConfig *DatabaseConfig
+	jwtConfig      *JwtConfig
+	serverConfig   *ServerConfig
+}
+
+type Config interface {
+	GetDatabaseConfig() *DatabaseConfig
+	GetJWTConfig() *JwtConfig
+	GetConfig() *config
+	GetServerConfig() *ServerConfig
 }

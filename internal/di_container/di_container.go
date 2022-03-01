@@ -4,8 +4,9 @@
 package di
 
 import (
-	"login_grpc/internal/app/grpcs"
+	"login_grpc/internal/config"
 	"login_grpc/internal/repository"
+	"login_grpc/internal/server/grpc"
 	"login_grpc/internal/services"
 
 	"github.com/google/wire"
@@ -29,12 +30,12 @@ func InitializeUserService(ur *repository.UserRepository) *services.UserService 
 	return &services.UserService{}
 }
 
-func InitializeUserServiceServer(us *services.UserService) *grpcs.UserServiceServer {
+func InitializeUserServiceServer(us *services.UserService, as *services.AuthService) *grpc.UserServiceServer {
 	wire.Build(
-		grpcs.UserServiceServerSet,
+		grpc.UserServiceServerSet,
 	)
 
-	return &grpcs.UserServiceServer{}
+	return &grpc.UserServiceServer{}
 }
 
 // Auth Dependencies Injection
@@ -46,7 +47,7 @@ func InitializeAuthRepository(dao *gorm.DB) *repository.AuthRepository {
 	return &repository.AuthRepository{}
 }
 
-func InitializeAuthService(ar *repository.AuthRepository) *services.AuthService {
+func InitializeAuthService(ar *repository.AuthRepository, th *services.TokenHandler) *services.AuthService {
 	wire.Build(
 		services.AuthServiceSet,
 	)
@@ -54,16 +55,16 @@ func InitializeAuthService(ar *repository.AuthRepository) *services.AuthService 
 	return &services.AuthService{}
 }
 
-func InitializeAuthServiceServer(as *services.AuthService, us *services.UserService, th *services.TokenHandler) *grpcs.AuthServiceServer {
+func InitializeAuthServiceServer(as *services.AuthService, us *services.UserService, th *services.TokenHandler) *grpc.AuthServiceServer {
 	wire.Build(
-		grpcs.AuthServiceServerSet,
+		grpc.AuthServiceServerSet,
 	)
 
-	return &grpcs.AuthServiceServer{}
+	return &grpc.AuthServiceServer{}
 }
 
 // Token Dependencies Injection
-func InitializeTokenHandler(secret string) *services.TokenHandler {
+func InitializeTokenHandler(secret *config.JwtConfig) *services.TokenHandler {
 	wire.Build(services.TokenHandlerSet)
 
 	return &services.TokenHandler{}

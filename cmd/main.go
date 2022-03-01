@@ -1,84 +1,52 @@
 package main
 
 import (
+	"context"
 	"log"
-	"net"
-	"os"
 
+	"login_grpc/internal/common"
 	"login_grpc/internal/config"
 	"login_grpc/internal/dao"
 	di "login_grpc/internal/di_container"
-	"login_grpc/pkg"
+	"login_grpc/internal/server/grpc"
 
-	"google.golang.org/grpc"
-	"google.golang.org/grpc/grpclog"
-	"google.golang.org/grpc/reflection"
+	"golang.org/x/sync/errgroup"
 )
 
-// func withUnaryInterceptor(f grpc.UnaryClientInterceptor) grpc.DialOption {
-// 	return grpc.UnaryInterceptor(grpc_middleware.ChainUnaryServer(
-// 		interceptor.LoggingServerInterceptor,
-// 		interceptor.AuthorizationServerInterceptor,
-// 	))
-// }
-
-// func clientInterceptor(
-// 	ctx context.Context,
-// 	method string,
-// 	req interface{},
-// 	reply interface{},
-// 	cc *grpc.ClientConn,
-// 	invoker grpc.UnaryInvoker,
-// 	opts ...grpc.CallOption,
-// ) error {
-// 	// Logic before invoking the invoker
-// 	start := time.Now()
-// 	// Calls the invoker to execute RPC
-// 	err := invoker(ctx, method, req, reply, cc, opts...)
-// 	// Logic after invoking the invoker
-// 	log.Printf("Invoked RPC method=%s; Duration=%s; Error=%v", method,
-// 		time.Since(start), err)
-// 	return err
-// }
-
 func main() {
-	// TODO: CREATE CONFIG STRUCT AND RETURN IT FROM THIS FUNCTION
-	// SO WE ARE NOT GOING TO DEPEND OF THE CONFIG READER
-	c := config.Init()
+	config := config.ViperConfigInit()
 
-	d, err := dao.NewPostgresDB(c)
+	db, err := dao.NewPostgresDB(config.GetDatabaseConfig())
 	if err != nil {
 		log.Fatalf("Failed to connect to database: %v", err)
 	}
 
-	grpcLog := grpclog.NewLoggerV2(os.Stdout, os.Stderr, os.Stderr)
-	grpclog.SetLoggerV2(grpcLog)
+	var (
+		userRepository = di.InitializeUserRepository(db)
+		authRepository = di.InitializeAuthRepository(db)
 
-	// Dependency Injection Container
-	userRepository := di.InitializeUserRepository(d)
-	authRepository := di.InitializeAuthRepository(d)
+		tokenHandler = di.InitializeTokenHandler(config.GetJWTConfig())
 
-	userService := di.InitializeUserService(userRepository)
-	authService := di.InitializeAuthService(authRepository)
+		userService = di.InitializeUserService(userRepository)
+		authService = di.InitializeAuthService(authRepository, tokenHandler)
 
-	tokenHandler := di.InitializeTokenHandler(c.GetString("jwt.secret"))
+		userServiceServer = di.InitializeUserServiceServer(userService, authService)
+		authServiceServer = di.InitializeAuthServiceServer(authService, userService, tokenHandler)
+	)
 
-	userServerService := di.InitializeUserServiceServer(userService)
-	authServiceServer := di.InitializeAuthServiceServer(authService, userService, tokenHandler)
+	ctx := context.Background()
+	ctx = common.SetGlobalService(ctx, common.GlobalService("tokenHandler"), tokenHandler)
 
-	s := grpc.NewServer()
-	pkg.RegisterUserServiceServer(s, userServerService)
-	pkg.RegisterLoginServiceServer(s, authServiceServer)
+	ctx, cancel := context.WithCancel(ctx)
+	defer cancel()
 
-	reflection.Register(s)
+	g, _ := errgroup.WithContext(ctx)
+	g.Go(func() error {
+		srv := grpc.NewServer(config.GetServerConfig(), userServiceServer, authServiceServer)
 
-	list, err := net.Listen("tcp", "0.0.0.0:50051")
-	if err != nil {
-		log.Fatalf("failed to listen: %v", err)
-	}
+		log.Printf("gRPC server running at %s://%s:%s ...\n", "tcp", "0.0.0.0", "50051")
+		return srv.Serve()
+	})
+	log.Fatal(g.Wait())
 
-	log.Println("Starting server on port 50051")
-	if err := s.Serve(list); err != nil {
-		log.Fatalf("failed to serve: %v", err)
-	}
 }

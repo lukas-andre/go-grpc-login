@@ -5,6 +5,8 @@ go 1.17
 require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/google/wire v0.5.0
+	github.com/grpc-ecosystem/go-grpc-middleware v1.3.0
+	google.golang.org/appengine v1.6.7
 	google.golang.org/grpc v1.44.0
 	google.golang.org/protobuf v1.27.1
 	gorm.io/driver/postgres v1.2.3
@@ -46,4 +48,5 @@ require (
 	github.com/jackc/pgx/v4 v4.15.0 // indirect
 	github.com/spf13/viper v1.10.1
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292 // indirect
+	golang.org/x/sync v0.0.0-20210220032951-036812b2e83c
 )
