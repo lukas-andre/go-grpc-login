@@ -2,7 +2,7 @@
 // versions:
 // - protoc-gen-go-grpc v1.2.0
 // - protoc             (unknown)
-// source: login.proto
+// source: auth.proto
 
 package pkg
 
@@ -35,7 +35,7 @@ func NewLoginServiceClient(cc grpc.ClientConnInterface) LoginServiceClient {
 
 func (c *loginServiceClient) Login(ctx context.Context, in *LoginRequest, opts ...grpc.CallOption) (*LoginResponse, error) {
 	out := new(LoginResponse)
-	err := c.cc.Invoke(ctx, "/login.LoginService/Login", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth.LoginService/Login", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -80,7 +80,7 @@ func _LoginService_Login_Handler(srv interface{}, ctx context.Context, dec func(
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/login.LoginService/Login",
+		FullMethod: "/auth.LoginService/Login",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(LoginServiceServer).Login(ctx, req.(*LoginRequest))
@@ -92,7 +92,7 @@ func _LoginService_Login_Handler(srv interface{}, ctx context.Context, dec func(
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var LoginService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "login.LoginService",
+	ServiceName: "auth.LoginService",
 	HandlerType: (*LoginServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -101,7 +101,7 @@ var LoginService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "login.proto",
+	Metadata: "auth.proto",
 }
 
 // UserServiceClient is the client API for UserService service.
@@ -122,7 +122,7 @@ func NewUserServiceClient(cc grpc.ClientConnInterface) UserServiceClient {
 
 func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserRequest, opts ...grpc.CallOption) (*CreateUserResponse, error) {
 	out := new(CreateUserResponse)
-	err := c.cc.Invoke(ctx, "/login.UserService/CreateUser", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth.UserService/CreateUser", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -131,7 +131,7 @@ func (c *userServiceClient) CreateUser(ctx context.Context, in *CreateUserReques
 
 func (c *userServiceClient) GetUserInfo(ctx context.Context, in *GetUserInfoRequest, opts ...grpc.CallOption) (*GetUserInfoResponse, error) {
 	out := new(GetUserInfoResponse)
-	err := c.cc.Invoke(ctx, "/login.UserService/GetUserInfo", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/auth.UserService/GetUserInfo", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -180,7 +180,7 @@ func _UserService_CreateUser_Handler(srv interface{}, ctx context.Context, dec f
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/login.UserService/CreateUser",
+		FullMethod: "/auth.UserService/CreateUser",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).CreateUser(ctx, req.(*CreateUserRequest))
@@ -198,7 +198,7 @@ func _UserService_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec 
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/login.UserService/GetUserInfo",
+		FullMethod: "/auth.UserService/GetUserInfo",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
 		return srv.(UserServiceServer).GetUserInfo(ctx, req.(*GetUserInfoRequest))
@@ -210,7 +210,7 @@ func _UserService_GetUserInfo_Handler(srv interface{}, ctx context.Context, dec 
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
 var UserService_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "login.UserService",
+	ServiceName: "auth.UserService",
 	HandlerType: (*UserServiceServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
@@ -223,5 +223,5 @@ var UserService_ServiceDesc = grpc.ServiceDesc{
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
-	Metadata: "login.proto",
+	Metadata: "auth.proto",
 }

@@ -57,9 +57,7 @@ func (s *UserServiceServer) CreateUser(ctx context.Context, in *pkg.CreateUserRe
 	}
 
 	if _, err = s.opts.UserService.CreateUser(user); err != nil {
-		return &pkg.CreateUserResponse{
-			Success: false,
-		}, status.Error(codes.Internal, err.Error())
+		return nil, status.Error(codes.Internal, err.Error())
 	}
 
 	return &pkg.CreateUserResponse{

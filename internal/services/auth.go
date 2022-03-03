@@ -33,13 +33,11 @@ func (s *AuthService) ValidateToken(ctx context.Context) (*UserClaims, error) {
 	if !ok {
 		return nil, errors.New("failed to get metadata")
 	}
-
 	token := md.Get(AuthorizationHeader)
 	userClaims, err := s.opts.TokenHandler.ParseToken(token[len(token)-1])
 	if err != nil {
 		return nil, err
 	}
-
 	return userClaims, nil
 }
 

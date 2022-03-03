@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-package login;
+package auth;
 
 option go_package = "/pkg";
 

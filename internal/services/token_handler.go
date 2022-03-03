@@ -44,7 +44,6 @@ func (t *TokenHandler) CreateToken(user *models.User) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-
 	return token.SignedString([]byte(t.opts.JwtConfig.Secret))
 }
 
@@ -55,14 +54,11 @@ func (t *TokenHandler) ParseToken(tokenString string) (*UserClaims, error) {
 		}
 		return []byte(t.opts.JwtConfig.Secret), nil
 	})
-
 	if err != nil {
 		return nil, err
 	}
-
 	if claims, ok := token.Claims.(*UserClaims); ok && token.Valid {
 		return claims, nil
 	}
-
 	return nil, err
 }
