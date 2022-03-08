@@ -2,6 +2,7 @@
 .PHONY: generate
 generate:
 	cd api; buf generate
+
 .PHONY: run
 run:
 	cd cmd; go run main.go
@@ -17,7 +18,3 @@ build:
 .PHONY: build-flags
 build-flags:
 	cd cmd; go build -ldflags "-s -w" main.go
-
-.PHONY: wire
-wire:
-	cd internal/di_container; rm -rf wire_gen.go; wire
